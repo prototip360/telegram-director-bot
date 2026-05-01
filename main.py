@@ -18,38 +18,40 @@ dp = Dispatcher()
 
 @dp.message()
 async def handle_director_message(message: types.Message):
+    # Проверяем тег
     if message.sender_tag != TARGET_TAG:
         return
 
-    # Обрабатываем ТОЛЬКО текстовые сообщения
+    # Обрабатываем ТОЛЬКО текстовые сообщения от Режиссёра
     if not message.text:
-        logger.info("Игнорируем медиа (для второго бота)")
+        logger.info("Игнорируем медиа от Режиссёра (для второго бота)")
         return
 
-    logger.info(f"Получен текст: {message.text[:50]}")
+    logger.info(f"Получен текст от Режиссёра: {message.text[:50]}")
 
     # Формируем текст ответа
     response_text = f"<b>🎬 ВНИМАНИЕ! Сообщение от нашего Режиссёра! 🎬\n\n{message.text}</b>"
 
-    # Если Режиссёр ответил на чьё-то сообщение — отвечаем на то же
+    # Если Режиссёр ответил на какое-то сообщение (текст, фото, видео, опрос — любое)
     if message.reply_to_message:
+        # Отправляем ответ на ТО САМОЕ сообщение (на которое ответил Режиссёр)
         await bot.send_message(
             chat_id=message.chat.id,
             text=response_text,
             reply_to_message_id=message.reply_to_message.message_id,
             parse_mode="HTML"
         )
-        logger.info("Ответ отправлен (с ответом на сообщение)")
+        logger.info(f"Ответ отправлен на сообщение {message.reply_to_message.message_id} (тип: {message.reply_to_message.content_type})")
     else:
-        # Обычная отправка в чат
+        # Если Режиссёр просто написал в чат (без ответа)
         await bot.send_message(
             chat_id=message.chat.id,
             text=response_text,
             parse_mode="HTML"
         )
-        logger.info("Сообщение отправлено в чат")
-    
-    # Удаляем оригинал
+        logger.info("Сообщение отправлено в чат (без ответа)")
+
+    # Удаляем оригинал сообщения Режиссёра
     await message.delete()
     logger.info("Оригинал удалён")
 
@@ -68,7 +70,9 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", 8000)
     await site.start()
     
-    print("✅ Первый бот запущен (только текст, с поддержкой ответов)")
+    print("✅ Первый бот запущен")
+    print("✅ Отвечает на ЛЮБЫЕ сообщения, на которые ответил Режиссёр")
+    
     await polling_task
 
 if __name__ == "__main__":
