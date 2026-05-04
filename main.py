@@ -18,39 +18,46 @@ dp = Dispatcher()
 
 @dp.message()
 async def handle_director_message(message: types.Message):
+    # Проверяем тег
     if message.sender_tag != TARGET_TAG:
         return
 
+    # Обрабатываем ТОЛЬКО текстовые сообщения
     if not message.text:
         logger.info("Игнорируем медиа (для второго бота)")
         return
 
     logger.info(f"Получен текст от Режиссёра: {message.text[:50]}")
 
-    response_text = f"<b>🎬 ВНИМАНИЕ! Сообщение от нашего Режиссёра! 🎬\n\n{message.text}</b>"
-
     # Определяем ID темы (если сообщение из темы)
-    thread_id = message.message_thread_id  # будет None, если темы нет
+    thread_id = message.message_thread_id
 
-    # Если Режиссёр ответил на чьё-то сообщение
+    # Оформление: заголовок с эмодзи + цитатный блок
+    response_text = (
+        f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
+        f"<blockquote>{message.text}</blockquote>"
+    )
+
+    # Отправляем ответ
     if message.reply_to_message:
         await bot.send_message(
             chat_id=message.chat.id,
             text=response_text,
             reply_to_message_id=message.reply_to_message.message_id,
-            message_thread_id=thread_id,  # КЛЮЧЕВОЙ ПАРАМЕТР
+            message_thread_id=thread_id,
             parse_mode="HTML"
         )
-        logger.info(f"Ответ отправлен в тему {thread_id or 'основную'}")
+        logger.info(f"Ответ отправлен на сообщение {message.reply_to_message.message_id}")
     else:
         await bot.send_message(
             chat_id=message.chat.id,
             text=response_text,
-            message_thread_id=thread_id,  # КЛЮЧЕВОЙ ПАРАМЕТР
+            message_thread_id=thread_id,
             parse_mode="HTML"
         )
-        logger.info(f"Сообщение отправлено в тему {thread_id or 'основную'}")
+        logger.info("Сообщение отправлено в чат")
 
+    # Удаляем оригинал
     await message.delete()
     logger.info("Оригинал удалён")
 
@@ -69,7 +76,7 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", 8000)
     await site.start()
     
-    print("✅ Первый бот запущен с поддержкой тем")
+    print("✅ Первый бот запущен с цитатным оформлением")
     
     await polling_task
 
