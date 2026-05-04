@@ -35,9 +35,9 @@ async def handle_director_message(message: types.Message):
     # Оформление: дефисы обычным шрифтом (без <code>)
     response_text = (
         f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
-        f"{'─' * 30}\n"
+        f"{'─' * 20}\n"
         f"{message.text}\n"
-        f"{'─' * 30}"
+        f"{'─' * 20}"
     )
 
     # Отправляем ответ
