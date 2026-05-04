@@ -32,10 +32,12 @@ async def handle_director_message(message: types.Message):
     # Определяем ID темы (если сообщение из темы)
     thread_id = message.message_thread_id
 
-    # Оформление: заголовок с эмодзи + цитатный блок
+    # Оформление: заголовок + дефисы
     response_text = (
         f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
-        f"<blockquote>{message.text}</blockquote>"
+        f"<code>{'─' * 35}</code>\n"
+        f"{message.text}\n"
+        f"<code>{'─' * 35}</code>"
     )
 
     # Отправляем ответ
@@ -76,7 +78,8 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", 8000)
     await site.start()
     
-    print("✅ Первый бот запущен с цитатным оформлением")
+    print("✅ Первый бот запущен с оформлением 'дефисы классика'")
+    print("🎬 Сообщение от Режиссёра обрамлено дефисами")
     
     await polling_task
 
