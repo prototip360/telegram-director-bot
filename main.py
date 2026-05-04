@@ -27,18 +27,38 @@ async def handle_director_message(message: types.Message):
         logger.info("Игнорируем медиа (для второго бота)")
         return
 
-    logger.info(f"Получен текст от Режиссёра: {message.text[:50]}")
-
-    # Определяем ID темы (если сообщение из темы)
+    # Определяем ID темы
     thread_id = message.message_thread_id
 
-    # Оформление: дефисы обычным шрифтом (без <code>)
-    response_text = (
-        f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
-        f"{'─' * 18}\n"
-        f"{message.text}\n"
-        f"{'─' * 18}"
-    )
+    # Проверяем, есть ли команда в начале сообщения
+    text = message.text
+    use_quote = False
+    
+    # Команды: /c, /цитата, /quote
+    if text.startswith("/c ") or text.startswith("/цитата ") or text.startswith("/quote "):
+        use_quote = True
+        # Убираем команду из текста (оставляем только текст после команды)
+        text = text.split(" ", 1)[1]
+    
+    logger.info(f"Получен текст от Режиссёра: {text[:50]}, цитата: {use_quote}")
+
+    # Оформление: классические дефисы (18 шт)
+    if use_quote:
+        # С цитатным блоком
+        response_text = (
+            f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
+            f"{'─' * 18}\n"
+            f"<blockquote>{text}</blockquote>\n"
+            f"{'─' * 18}"
+        )
+    else:
+        # Без цитаты, просто текст
+        response_text = (
+            f"🎬 <b>Сообщение от Режиссёра</b> 🎬\n"
+            f"{'─' * 18}\n"
+            f"{text}\n"
+            f"{'─' * 18}"
+        )
 
     # Отправляем ответ
     if message.reply_to_message:
@@ -79,7 +99,7 @@ async def main():
     await site.start()
     
     print("✅ Первый бот запущен")
-    print("✅ Дефисы обычным шрифтом — корректно переносятся на любых устройствах")
+    print("✅ /c текст → цитата, текст → без цитаты")
     
     await polling_task
 
